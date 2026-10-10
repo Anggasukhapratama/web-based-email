@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* ===== GLOBAL RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #0a0f1a;
+  color: #e2e8f0;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0f1a;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* ===== A4 PAPER SHADOW ===== */
+.paper-shadow {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 10px 40px -5px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+/* ===== GLASSMORPHISM PANEL ===== */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ===== ANIMATED GRADIENT BG ===== */
+.bg-animated {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(29, 78, 216, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 60%),
+    #0a0f1a;
+}
+
+/* ===== FORM INPUT DATE OVERRIDE ===== */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.5);
+  cursor: pointer;
+}
+
+/* ===== PREVIEW PANEL SCALE ===== */
+.preview-scaler {
+  transform-origin: top center;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  body, html, .min-h-screen, .bg-animated, main {
+    background: white !important;
+    min-height: auto !important;
+  }
+  
+  /* Hide UI elements */
+  header, aside, footer, .sticky {
+    display: none !important;
+  }
+
+  /* Reset layout constraints so it can page-break normally */
+  main, main > div {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Reset scale so it prints at 100% size */
+  .preview-scaler {
+    transform: none !important;
+    margin: 0 !important;
+    width: auto !important;
+  }
+
+  .p-6 {
+    padding: 0 !important;
+  }
+
+  .flex.justify-center {
+    display: block !important;
+  }
+
+  #print-target {
+    box-shadow: none !important;
+    margin: 0 auto !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}
