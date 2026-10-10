@@ -2,16 +2,12 @@
 
 import React from 'react';
 import { FormalFormData } from '@/types/letter';
+import AIAssistant from './AIAssistant';
 
 interface FormalFormProps {
   data: FormalFormData;
   onChange: (data: FormalFormData) => void;
 }
-
-const inputClass =
-  'w-full bg-slate-800/60 border border-slate-700/60 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500/70 focus:bg-slate-800 focus:ring-1 focus:ring-blue-500/30 transition-all duration-150';
-const labelClass = 'block text-xs font-medium text-slate-400 mb-1';
-const fieldGroup = 'space-y-1';
 
 export default function FormalForm({ data, onChange }: FormalFormProps) {
   const set = (key: keyof FormalFormData) => (
@@ -24,9 +20,7 @@ export default function FormalForm({ data, onChange }: FormalFormProps) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange({ ...data, [key]: reader.result as string });
-      };
+      reader.onloadend = () => onChange({ ...data, [key]: reader.result as string });
       reader.readAsDataURL(file);
     } else {
       onChange({ ...data, [key]: '' });
@@ -34,117 +28,126 @@ export default function FormalForm({ data, onChange }: FormalFormProps) {
   };
 
   return (
-    <div className="space-y-5">
-      {/* Header Info */}
-      <div className="pb-3 border-b border-slate-700/50">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-          Kop Surat (Header)
-        </h3>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-3">
-        <div className={fieldGroup}>
-          <label className={labelClass}>Logo Kiri (Opsional)</label>
-          <input type="file" accept="image/*" className={`${inputClass} text-xs p-1`} onChange={handleImageUpload('logoLeft')} />
+    <div>
+      {/* Kop Surat */}
+      <div className="form-section-title">Kop Surat (Header)</div>
+
+      <div className="form-grid-2">
+        <div className="form-field">
+          <label className="form-label">Logo Kiri (Opsional)</label>
+          <input type="file" accept="image/*" className="form-input" style={{ fontSize: '0.72rem', padding: '0.3rem 0.5rem' }} onChange={handleImageUpload('logoLeft')} />
         </div>
-        <div className={fieldGroup}>
-          <label className={labelClass}>Logo Kanan (Opsional)</label>
-          <input type="file" accept="image/*" className={`${inputClass} text-xs p-1`} onChange={handleImageUpload('logoRight')} />
+        <div className="form-field">
+          <label className="form-label">Logo Kanan (Opsional)</label>
+          <input type="file" accept="image/*" className="form-input" style={{ fontSize: '0.72rem', padding: '0.3rem 0.5rem' }} onChange={handleImageUpload('logoRight')} />
         </div>
       </div>
-      
-      <div className={fieldGroup}>
-        <label className={labelClass}>Nama Instansi / Komisi</label>
+
+      <div className="form-field">
+        <label className="form-label">Nama Instansi / Komisi</label>
         <textarea
-          className={`${inputClass} resize-none leading-relaxed text-center`}
+          className="form-input"
           rows={2}
+          style={{ resize: 'none', textAlign: 'center', lineHeight: '1.55' }}
           value={data.headerName}
           onChange={set('headerName')}
           placeholder="KOMISI HUBUNGAN ANTAR AGAMA..."
         />
       </div>
-      
-      <div className={fieldGroup}>
-        <label className={labelClass}>Alamat</label>
-        <input type="text" className={`${inputClass} text-center`} value={data.headerAddress} onChange={set('headerAddress')} placeholder="Gedung Karya Pastoral..." />
+      <div className="form-field">
+        <label className="form-label">Alamat</label>
+        <input type="text" className="form-input" style={{ textAlign: 'center' }} value={data.headerAddress} onChange={set('headerAddress')} placeholder="Gedung Karya Pastoral..." />
       </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Kontak</label>
-        <input type="text" className={`${inputClass} text-center`} value={data.headerContact} onChange={set('headerContact')} placeholder="Telp: 021-..." />
-      </div>
-
-      <div className="pb-3 border-b border-slate-700/50 pt-2">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Informasi Surat</h3>
-      </div>
-      
-      <div className="grid grid-cols-2 gap-3">
-        <div className={fieldGroup}>
-          <label className={labelClass}>Nomor Surat</label>
-          <input type="text" className={inputClass} value={data.letterNumber} onChange={set('letterNumber')} />
-        </div>
-        <div className={fieldGroup}>
-          <label className={labelClass}>Tanggal</label>
-          <input type="date" className={inputClass} value={data.date} onChange={set('date')} />
-        </div>
-      </div>
-      
-      <div className={fieldGroup}>
-        <label className={labelClass}>Lampiran</label>
-        <input type="text" className={inputClass} value={data.attachment} onChange={set('attachment')} placeholder="- / 1 Berkas" />
-      </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Perihal</label>
-        <input type="text" className={inputClass} value={data.subject} onChange={set('subject')} placeholder="Undangan Rapat..." />
-      </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Kepada Yth.</label>
-        <textarea className={`${inputClass} resize-none leading-relaxed`} rows={2} value={data.to} onChange={set('to')} placeholder="Para Romo, Bapak/Ibu..." />
+      <div className="form-field">
+        <label className="form-label">Kontak</label>
+        <input type="text" className="form-input" style={{ textAlign: 'center' }} value={data.headerContact} onChange={set('headerContact')} placeholder="Telp: 021-..." />
       </div>
 
-      <div className="pb-3 border-b border-slate-700/50 pt-2">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Isi Surat</h3>
-      </div>
-      
-      <div className={fieldGroup}>
-        <label className={labelClass}>Salam Pembuka</label>
-        <input type="text" className={inputClass} value={data.greeting} onChange={set('greeting')} placeholder="Dengan hormat," />
-      </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Isi</label>
-        <textarea className={`${inputClass} resize-none leading-relaxed`} rows={6} value={data.body} onChange={set('body')} placeholder="Bersama ini kami..." />
-      </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Salam Penutup</label>
-        <textarea className={`${inputClass} resize-none leading-relaxed`} rows={2} value={data.closing} onChange={set('closing')} placeholder="Demikianlah penjelasan dari kami..." />
+      {/* Informasi Surat */}
+      <div className="form-section-title" style={{ marginTop: '1rem' }}>Informasi Surat</div>
+
+      <div className="form-grid-2">
+        <div className="form-field">
+          <label className="form-label">Nomor Surat</label>
+          <input type="text" className="form-input" value={data.letterNumber} onChange={set('letterNumber')} />
+        </div>
+        <div className="form-field">
+          <label className="form-label">Tanggal</label>
+          <input type="date" className="form-input" value={data.date} onChange={set('date')} />
+        </div>
       </div>
 
-      <div className="pb-3 border-b border-slate-700/50 pt-2">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Penandatangan</h3>
+      <div className="form-field">
+        <label className="form-label">Lampiran</label>
+        <input type="text" className="form-input" value={data.attachment} onChange={set('attachment')} placeholder="- / 1 Berkas" />
       </div>
-      
-      <div className={fieldGroup}>
-        <label className={labelClass}>Lokasi (untuk tanggal ttd)</label>
-        <input type="text" className={inputClass} value={data.location} onChange={set('location')} placeholder="Jakarta" />
+      <div className="form-field">
+        <label className="form-label">Perihal</label>
+        <input type="text" className="form-input" value={data.subject} onChange={set('subject')} placeholder="Undangan Rapat..." />
       </div>
-      
-      <div className="grid grid-cols-2 gap-3 mt-2">
-        <div className={fieldGroup}>
-          <label className={labelClass}>Jabatan 1 (Kiri)</label>
-          <input type="text" className={inputClass} value={data.signer1Title} onChange={set('signer1Title')} placeholder="Ketua" />
+      <div className="form-field">
+        <label className="form-label">Kepada Yth.</label>
+        <textarea className="form-input" rows={2} style={{ resize: 'none', lineHeight: '1.55' }} value={data.to} onChange={set('to')} placeholder="Para Romo, Bapak/Ibu..." />
+      </div>
+
+      {/* Isi Surat */}
+      <div className="form-section-title" style={{ marginTop: '1rem' }}>Isi Surat</div>
+
+      <div className="form-field">
+        <label className="form-label">Salam Pembuka</label>
+        <input type="text" className="form-input" value={data.greeting} onChange={set('greeting')} placeholder="Dengan hormat," />
+      </div>
+      <div className="form-field">
+        <label className="form-label">Isi</label>
+        <textarea
+          className="form-input"
+          rows={6}
+          style={{ resize: 'none', lineHeight: '1.55' }}
+          value={data.body}
+          onChange={set('body')}
+          placeholder="Bersama ini kami..."
+        />
+      </div>
+
+      {/* AI Assistant */}
+      <AIAssistant
+        letterType="formal"
+        context={{ subject: data.subject, to: data.to }}
+        onApply={(text) => onChange({ ...data, body: text })}
+        fieldLabel="Isi Surat"
+      />
+
+      <div className="form-field" style={{ marginTop: '0.75rem' }}>
+        <label className="form-label">Salam Penutup</label>
+        <textarea className="form-input" rows={2} style={{ resize: 'none', lineHeight: '1.55' }} value={data.closing} onChange={set('closing')} placeholder="Demikianlah penjelasan dari kami..." />
+      </div>
+
+      {/* Penandatangan */}
+      <div className="form-section-title" style={{ marginTop: '1rem' }}>Penandatangan</div>
+
+      <div className="form-field">
+        <label className="form-label">Lokasi (untuk tanggal ttd)</label>
+        <input type="text" className="form-input" value={data.location} onChange={set('location')} placeholder="Jakarta" />
+      </div>
+
+      <div className="form-grid-2" style={{ marginTop: '0.25rem' }}>
+        <div className="form-field">
+          <label className="form-label">Jabatan 1 (Kiri)</label>
+          <input type="text" className="form-input" value={data.signer1Title} onChange={set('signer1Title')} placeholder="Ketua" />
         </div>
-        <div className={fieldGroup}>
-          <label className={labelClass}>Nama 1 (Kiri)</label>
-          <input type="text" className={inputClass} value={data.signer1Name} onChange={set('signer1Name')} placeholder="Nama Ketua" />
+        <div className="form-field">
+          <label className="form-label">Nama 1 (Kiri)</label>
+          <input type="text" className="form-input" value={data.signer1Name} onChange={set('signer1Name')} placeholder="Nama Ketua" />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-3 mt-2">
-        <div className={fieldGroup}>
-          <label className={labelClass}>Jabatan 2 (Kanan)</label>
-          <input type="text" className={inputClass} value={data.signer2Title} onChange={set('signer2Title')} placeholder="Sekretaris" />
+      <div className="form-grid-2">
+        <div className="form-field">
+          <label className="form-label">Jabatan 2 (Kanan)</label>
+          <input type="text" className="form-input" value={data.signer2Title} onChange={set('signer2Title')} placeholder="Sekretaris" />
         </div>
-        <div className={fieldGroup}>
-          <label className={labelClass}>Nama 2 (Kanan)</label>
-          <input type="text" className={inputClass} value={data.signer2Name} onChange={set('signer2Name')} placeholder="Nama Sekretaris" />
+        <div className="form-field">
+          <label className="form-label">Nama 2 (Kanan)</label>
+          <input type="text" className="form-input" value={data.signer2Name} onChange={set('signer2Name')} placeholder="Nama Sekretaris" />
         </div>
       </div>
     </div>

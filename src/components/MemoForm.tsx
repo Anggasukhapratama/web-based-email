@@ -2,16 +2,12 @@
 
 import React from 'react';
 import { MemoFormData } from '@/types/letter';
+import AIAssistant from './AIAssistant';
 
 interface MemoFormProps {
   data: MemoFormData;
   onChange: (data: MemoFormData) => void;
 }
-
-const inputClass =
-  'w-full bg-slate-800/60 border border-slate-700/60 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500/70 focus:bg-slate-800 focus:ring-1 focus:ring-blue-500/30 transition-all duration-150';
-const labelClass = 'block text-xs font-medium text-slate-400 mb-1';
-const fieldGroup = 'space-y-1';
 
 export default function MemoForm({ data, onChange }: MemoFormProps) {
   const set = (key: keyof MemoFormData) => (
@@ -22,9 +18,7 @@ export default function MemoForm({ data, onChange }: MemoFormProps) {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => {
-        onChange({ ...data, logo: reader.result as string });
-      };
+      reader.onloadend = () => onChange({ ...data, logo: reader.result as string });
       reader.readAsDataURL(file);
     } else {
       onChange({ ...data, logo: '' });
@@ -32,146 +26,97 @@ export default function MemoForm({ data, onChange }: MemoFormProps) {
   };
 
   return (
-    <div className="space-y-5">
-      {/* Header Info */}
-      <div className="pb-3 border-b border-slate-700/50">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-          Kop Surat (Header)
-        </h3>
+    <div>
+      {/* Kop Surat */}
+      <div className="form-section-title">Kop Surat</div>
+
+      <div className="form-field">
+        <label className="form-label">Logo Instansi (Opsional)</label>
+        <input type="file" accept="image/*" className="form-input" style={{ fontSize: '0.72rem', padding: '0.3rem 0.5rem' }} onChange={handleImageUpload} />
       </div>
-      
-      <div className={fieldGroup}>
-        <label className={labelClass}>Logo Instansi (Opsional)</label>
-        <input type="file" accept="image/*" className={`${inputClass} text-xs p-1`} onChange={handleImageUpload} />
+      <div className="form-field">
+        <label className="form-label">Nama Instansi / Perusahaan</label>
+        <input type="text" className="form-input" value={data.companyName} onChange={set('companyName')} placeholder="PT PERTAMINA (PERSERO)" />
       </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Nama Instansi / Perusahaan</label>
-        <input type="text" className={inputClass} value={data.companyName} onChange={set('companyName')} placeholder="PT PERTAMINA (PERSERO)" />
+      <div className="form-field">
+        <label className="form-label">Nama Departemen / Fungsi</label>
+        <input type="text" className="form-input" value={data.departmentName} onChange={set('departmentName')} placeholder="FUNGSI INFORMATION TECHNOLOGY" />
       </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Nama Departemen / Fungsi</label>
-        <input type="text" className={inputClass} value={data.departmentName} onChange={set('departmentName')} placeholder="FUNGSI INFORMATION TECHNOLOGY" />
-      </div>
-      <div className={fieldGroup}>
-        <label className={labelClass}>Alamat & Kontak</label>
-        <textarea className={`${inputClass} resize-none`} rows={2} value={data.companyAddress} onChange={set('companyAddress')} placeholder="Jl. Medan Merdeka..." />
+      <div className="form-field">
+        <label className="form-label">Alamat & Kontak</label>
+        <textarea className="form-input" rows={2} style={{ resize: 'none' }} value={data.companyAddress} onChange={set('companyAddress')} placeholder="Jl. Medan Merdeka..." />
       </div>
 
-      <div className="pb-3 border-b border-slate-700/50 pt-2">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-          Informasi Surat
-        </h3>
-      </div>
+      {/* Informasi Surat */}
+      <div className="form-section-title" style={{ marginTop: '1rem' }}>Informasi Surat</div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className={fieldGroup}>
-          <label className={labelClass}>Nomor Surat</label>
-          <input
-            type="text"
-            className={inputClass}
-            value={data.letterNumber}
-            onChange={set('letterNumber')}
-            placeholder="Auto-generated"
-          />
+      <div className="form-grid-2">
+        <div className="form-field">
+          <label className="form-label">Nomor Surat</label>
+          <input type="text" className="form-input" value={data.letterNumber} onChange={set('letterNumber')} placeholder="Auto-generated" />
         </div>
-        <div className={fieldGroup}>
-          <label className={labelClass}>Tanggal</label>
-          <input
-            type="date"
-            className={inputClass}
-            value={data.date}
-            onChange={set('date')}
-          />
+        <div className="form-field">
+          <label className="form-label">Tanggal</label>
+          <input type="date" className="form-input" value={data.date} onChange={set('date')} />
         </div>
       </div>
 
-      <div className={fieldGroup}>
-        <label className={labelClass}>Klasifikasi</label>
-        <select className={inputClass} value={data.classification} onChange={set('classification')}>
+      <div className="form-field">
+        <label className="form-label">Klasifikasi</label>
+        <select className="form-input" value={data.classification} onChange={set('classification')}>
           <option value="BIASA">BIASA</option>
           <option value="SEGERA">SEGERA</option>
           <option value="RAHASIA">RAHASIA</option>
         </select>
       </div>
 
-      <div className={fieldGroup}>
-        <label className={labelClass}>Kepada (Yth.)</label>
-        <input
-          type="text"
-          className={inputClass}
-          value={data.to}
-          onChange={set('to')}
-          placeholder="Nama / Jabatan penerima"
-        />
+      <div className="form-field">
+        <label className="form-label">Kepada (Yth.)</label>
+        <input type="text" className="form-input" value={data.to} onChange={set('to')} placeholder="Nama / Jabatan penerima" />
+      </div>
+      <div className="form-field">
+        <label className="form-label">Dari</label>
+        <input type="text" className="form-input" value={data.from} onChange={set('from')} placeholder="Nama / Jabatan pengirim" />
+      </div>
+      <div className="form-field">
+        <label className="form-label">Perihal / Subjek</label>
+        <input type="text" className="form-input" value={data.subject} onChange={set('subject')} placeholder="Judul atau pokok bahasan memo" />
       </div>
 
-      <div className={fieldGroup}>
-        <label className={labelClass}>Dari</label>
-        <input
-          type="text"
-          className={inputClass}
-          value={data.from}
-          onChange={set('from')}
-          placeholder="Nama / Jabatan pengirim"
-        />
-      </div>
+      {/* Isi Memo */}
+      <div className="form-section-title" style={{ marginTop: '1rem' }}>Isi Memo</div>
 
-
-
-      <div className={fieldGroup}>
-        <label className={labelClass}>Perihal / Subjek</label>
-        <input
-          type="text"
-          className={inputClass}
-          value={data.subject}
-          onChange={set('subject')}
-          placeholder="Judul atau pokok bahasan memo"
-        />
-      </div>
-
-      <div className="pb-3 border-b border-slate-700/50 pt-2">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-          Isi Memo
-        </h3>
-      </div>
-
-      <div className={fieldGroup}>
-        <label className={labelClass}>Isi Surat</label>
+      <div className="form-field">
+        <label className="form-label">Isi Surat</label>
         <textarea
-          className={`${inputClass} resize-none leading-relaxed`}
-          rows={8}
+          className="form-input"
+          rows={7}
+          style={{ resize: 'none', lineHeight: '1.55' }}
           value={data.body}
           onChange={set('body')}
           placeholder="Tulis isi memo di sini. Gunakan Enter untuk memisahkan paragraf..."
         />
       </div>
 
-      <div className="pb-3 border-b border-slate-700/50 pt-2">
-        <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-          Penandatangan
-        </h3>
-      </div>
+      {/* AI Assistant */}
+      <AIAssistant
+        letterType="memo"
+        context={{ subject: data.subject, to: data.to, from: data.from }}
+        onApply={(text) => onChange({ ...data, body: text })}
+        fieldLabel="Isi Memo"
+      />
 
-      <div className="grid grid-cols-2 gap-3">
-        <div className={fieldGroup}>
-          <label className={labelClass}>Nama Penandatangan</label>
-          <input
-            type="text"
-            className={inputClass}
-            value={data.signerName}
-            onChange={set('signerName')}
-            placeholder="Nama lengkap"
-          />
+      {/* Penandatangan */}
+      <div className="form-section-title" style={{ marginTop: '1rem' }}>Penandatangan</div>
+
+      <div className="form-grid-2">
+        <div className="form-field">
+          <label className="form-label">Nama Penandatangan</label>
+          <input type="text" className="form-input" value={data.signerName} onChange={set('signerName')} placeholder="Nama lengkap" />
         </div>
-        <div className={fieldGroup}>
-          <label className={labelClass}>Jabatan</label>
-          <input
-            type="text"
-            className={inputClass}
-            value={data.signerTitle}
-            onChange={set('signerTitle')}
-            placeholder="Jabatan / posisi"
-          />
+        <div className="form-field">
+          <label className="form-label">Jabatan</label>
+          <input type="text" className="form-input" value={data.signerTitle} onChange={set('signerTitle')} placeholder="Jabatan / posisi" />
         </div>
       </div>
     </div>

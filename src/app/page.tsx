@@ -11,7 +11,7 @@ import MemoPreview from '@/components/MemoPreview';
 import SIKAPreview from '@/components/SIKAPreview';
 import FormalPreview from '@/components/FormalPreview';
 import ExportBar from '@/components/ExportBar';
-import { Zap, RefreshCw, Hash } from 'lucide-react';
+import { Zap, RefreshCw, Hash, FileText, Eye } from 'lucide-react';
 
 const today = new Date().toISOString().split('T')[0];
 
@@ -77,16 +77,18 @@ const defaultFormal = (): FormalFormData => ({
   signer2Name: '',
 });
 
+type MobileTab = 'form' | 'preview';
+
 export default function HomePage() {
   const [letterType, setLetterType] = useState<LetterType>('memo');
   const [memoData, setMemoData] = useState<MemoFormData>(defaultMemo);
   const [sikaData, setSIKAData] = useState<SIKAFormData>(defaultSIKA);
   const [formalData, setFormalData] = useState<FormalFormData>(defaultFormal);
   const [previewScale, setPreviewScale] = useState(1);
+  const [mobileTab, setMobileTab] = useState<MobileTab>('form');
   const previewContainerRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
-  // Client-side mount
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -108,8 +110,8 @@ export default function HomePage() {
   useEffect(() => {
     const updateScale = () => {
       if (!previewContainerRef.current) return;
-      const containerWidth = previewContainerRef.current.offsetWidth - 48; // padding
-      const a4WidthPx = 794; // 210mm @ 96dpi
+      const containerWidth = previewContainerRef.current.offsetWidth - 48;
+      const a4WidthPx = 794;
       const scale = Math.min(1, containerWidth / a4WidthPx);
       setPreviewScale(scale);
     };
@@ -147,89 +149,93 @@ export default function HomePage() {
   };
 
   const currentLetterNumber =
-    letterType === 'memo' ? memoData.letterNumber : (letterType === 'sika' ? sikaData.letterNumber : formalData.letterNumber);
+    letterType === 'memo'
+      ? memoData.letterNumber
+      : letterType === 'sika'
+      ? sikaData.letterNumber
+      : formalData.letterNumber;
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-animated flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-400 text-sm">Memuat QuickLetter...</p>
+      <div style={{ minHeight: '100vh', background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: '36px', height: '36px', border: '3px solid #2563eb', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+          <p style={{ color: '#64748b', fontSize: '0.8rem' }}>Memuat QuickLetter...</p>
         </div>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-animated flex flex-col">
+    <div className="app-shell">
       {/* ===== TOPBAR ===== */}
-      <header className="glass-panel border-b border-white/5 sticky top-0 z-50">
-        <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+      <header className="topbar">
+        <div className="topbar-inner">
           {/* Brand */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <Zap className="w-5 h-5 text-white" />
+          <div className="brand">
+            <div className="brand-icon">
+              <Zap style={{ width: '16px', height: '16px', color: 'white' }} />
             </div>
             <div>
-              <h1 className="text-white font-bold text-lg leading-none tracking-tight">
-                QuickLetter
-              </h1>
-              <p className="text-slate-500 text-xs leading-none mt-0.5">
-                Generator Surat Otomatis
-              </p>
+              <div className="brand-name">QuickLetter</div>
+              <div className="brand-tagline">Generator Surat Otomatis</div>
             </div>
           </div>
 
-          {/* Letter number badge */}
-          <div className="flex-1 max-w-md hidden md:flex items-center justify-center">
-            <div className="flex items-center gap-2 bg-slate-800/60 border border-slate-700/50 rounded-full px-4 py-1.5">
-              <Hash className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-xs text-slate-300 font-mono tracking-wide">
-                {currentLetterNumber || 'Nomor akan di-generate otomatis'}
-              </span>
-              <button
-                onClick={handleRegenerateNumber}
-                className="ml-1 text-slate-500 hover:text-blue-400 transition-colors"
-                title="Regenerate nomor surat"
-              >
-                <RefreshCw className="w-3 h-3" />
-              </button>
-            </div>
+          {/* Letter number badge (desktop only) */}
+          <div className="letter-num-badge" style={{ flex: 1, maxWidth: '380px' }}>
+            <Hash style={{ width: '12px', height: '12px', color: '#2563eb', flexShrink: 0 }} />
+            <span className="letter-num-text">
+              {currentLetterNumber || 'Nomor akan di-generate otomatis'}
+            </span>
+            <button onClick={handleRegenerateNumber} className="regen-btn" title="Regenerate nomor surat">
+              <RefreshCw style={{ width: '11px', height: '11px' }} />
+            </button>
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-slate-400 text-sm hover:text-slate-200 hover:bg-slate-700/50 transition-all duration-150"
-            >
-              <RefreshCw className="w-4 h-4" />
-              <span className="hidden sm:inline">Reset Form</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+            <button onClick={handleReset} className="reset-btn" title="Reset Form">
+              <RefreshCw style={{ width: '13px', height: '13px' }} />
+              <span className="reset-btn-text">Reset</span>
             </button>
             <ExportBar letterType={letterType} letterNumber={currentLetterNumber} />
           </div>
         </div>
       </header>
 
-      {/* ===== MAIN SPLIT SCREEN ===== */}
-      <main className="flex-1 flex overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
-        {/* ===== LEFT PANEL: FORM ===== */}
-        <aside className="w-[400px] flex-shrink-0 flex flex-col glass-panel border-r border-white/5 overflow-hidden">
-          {/* Panel header */}
-          <div className="px-6 py-4 border-b border-white/5">
-            <h2 className="text-sm font-semibold text-slate-200">Form Isian</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Isi data di bawah untuk mengisi surat</p>
-          </div>
+      {/* ===== MOBILE TABS ===== */}
+      <div className="mobile-tabs">
+        <button
+          className={`mobile-tab-btn ${mobileTab === 'form' ? 'active' : ''}`}
+          onClick={() => setMobileTab('form')}
+        >
+          <FileText style={{ width: '14px', height: '14px' }} />
+          Form Isian
+        </button>
+        <button
+          className={`mobile-tab-btn ${mobileTab === 'preview' ? 'active' : ''}`}
+          onClick={() => setMobileTab('preview')}
+        >
+          <Eye style={{ width: '14px', height: '14px' }} />
+          Preview
+        </button>
+      </div>
 
-          {/* Scrollable form content */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-            {/* Template selector */}
+      {/* ===== MAIN CONTENT ===== */}
+      <main className="main-area" style={{ height: 'calc(100vh - 56px)' }}>
+        {/* ===== SIDEBAR: FORM ===== */}
+        <aside className={`sidebar ${mobileTab === 'preview' ? 'mobile-hidden' : ''}`}>
+          <div className="sidebar-header">
+            <div className="sidebar-title">Form Isian</div>
+            <div className="sidebar-subtitle">Isi data untuk membuat surat</div>
+          </div>
+          <div className="sidebar-scroll sidebar-scroll">
             <TemplateSelector selected={letterType} onChange={handleTypeChange} />
 
-            {/* Divider */}
-            <div className="border-t border-slate-700/50" />
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', margin: '1rem 0' }} />
 
-            {/* Dynamic form */}
             {letterType === 'memo' && (
               <MemoForm data={memoData} onChange={setMemoData} />
             )}
@@ -240,33 +246,29 @@ export default function HomePage() {
               <FormalForm data={formalData} onChange={setFormalData} />
             )}
 
-            {/* Bottom padding */}
-            <div className="h-8" />
+            <div style={{ height: '2rem' }} />
           </div>
         </aside>
 
-        {/* ===== RIGHT PANEL: PREVIEW ===== */}
+        {/* ===== PREVIEW PANEL ===== */}
         <div
           ref={previewContainerRef}
-          className="flex-1 overflow-y-auto bg-slate-900/40"
-          style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)', backgroundSize: '24px 24px' }}
+          className={`preview-area ${mobileTab === 'form' ? 'mobile-hidden' : ''}`}
         >
           {/* Preview toolbar */}
-          <div className="sticky top-0 z-10 glass-panel border-b border-white/5 px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                Live Preview
-              </span>
-              <span className="flex items-center gap-1 text-xs text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse inline-block" />
-                Real-time
-              </span>
+          <div className="preview-toolbar">
+            <div className="preview-live-badge">
+              <div
+                className="preview-live-dot"
+                style={{ animation: 'pulse 2s infinite' }}
+              />
+              Live Preview
             </div>
-            <span className="text-xs text-slate-600 font-mono">A4 · 210 × 297 mm</span>
+            <span className="preview-a4-label">A4 · 210 × 297 mm</span>
           </div>
 
           {/* Paper preview */}
-          <div className="p-6 flex justify-center">
+          <div className="preview-canvas">
             <div
               className="preview-scaler"
               style={{
@@ -276,19 +278,10 @@ export default function HomePage() {
                 marginBottom: previewScale < 1 ? `${-(794 * (1 - previewScale) * 1.41)}px` : 0,
               }}
             >
-              <div
-                id="print-target"
-                className="rounded-sm paper-shadow overflow-hidden"
-              >
-                {letterType === 'memo' && (
-                  <MemoPreview data={memoData} />
-                )}
-                {letterType === 'sika' && (
-                  <SIKAPreview data={sikaData} />
-                )}
-                {letterType === 'formal' && (
-                  <FormalPreview data={formalData} />
-                )}
+              <div id="print-target" className="paper-shadow" style={{ borderRadius: '2px', overflow: 'hidden' }}>
+                {letterType === 'memo' && <MemoPreview data={memoData} />}
+                {letterType === 'sika' && <SIKAPreview data={sikaData} />}
+                {letterType === 'formal' && <FormalPreview data={formalData} />}
               </div>
             </div>
           </div>
@@ -296,14 +289,20 @@ export default function HomePage() {
       </main>
 
       {/* ===== STATUS BAR ===== */}
-      <footer className="glass-panel border-t border-white/5 px-6 py-2 flex items-center justify-between">
-        <p className="text-xs text-slate-600">
-          QuickLetter v1.0.0 — PT Pertamina (Persero) · Fungsi Information Technology
-        </p>
-        <p className="text-xs text-slate-600">
-          Data diproses secara lokal di browser · Tidak dikirim ke server
-        </p>
+      <footer className="status-bar">
+        <p className="status-text">QuickLetter v2.0.0 — PT Pertamina (Persero) · Fungsi IT</p>
+        <p className="status-text">Data diproses lokal di browser · Tidak dikirim ke server</p>
       </footer>
+
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.4; }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

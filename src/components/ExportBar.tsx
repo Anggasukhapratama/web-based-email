@@ -14,30 +14,57 @@ export default function ExportBar({ letterType, letterNumber }: ExportBarProps) 
   const [pdfLoading, setPdfLoading] = useState(false);
   const [pdfDone, setPdfDone] = useState(false);
 
-
-
   const handleDownloadPDF = async () => {
     setPdfLoading(true);
     try {
+      // We use the #print-target element (the raw letter preview)
       const element = document.getElementById('letter-preview');
-      if (!element) return;
+      if (!element) {
+        console.error('PDF export: #letter-preview element not found');
+        return;
+      }
 
       const html2canvas = (await import('html2canvas')).default;
       const jsPDF = (await import('jspdf')).default;
 
+      // Temporarily make the element's parent visible at full scale for capture
+      const previewScaler = element.closest('.preview-scaler') as HTMLElement | null;
+      const originalTransform = previewScaler?.style.transform || '';
+      const originalMarginBottom = previewScaler?.style.marginBottom || '';
+
+      if (previewScaler) {
+        previewScaler.style.transform = 'scale(1)';
+        previewScaler.style.marginBottom = '0';
+      }
+
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 2,           // high DPI
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
         onclone: (clonedDoc) => {
-          // Remove all stylesheets from the cloned document to prevent html2canvas
-          // from parsing Tailwind v4's oklch/lab variables, which causes a crash.
-          // The preview components use purely inline styles, so this is perfectly safe.
+          // Remove Tailwind CSS to avoid oklch color parsing crash
           const styles = clonedDoc.querySelectorAll('style, link[rel="stylesheet"]');
-          styles.forEach(style => style.remove());
-        }
+          styles.forEach((s) => s.remove());
+
+          // Make the cloned element render at full width
+          const clonedEl = clonedDoc.getElementById('letter-preview') as HTMLElement | null;
+          if (clonedEl) {
+            clonedEl.style.transform = 'none';
+            clonedEl.style.width = '794px';
+          }
+        },
       });
+
+      // Restore original transform
+      if (previewScaler) {
+        previewScaler.style.transform = originalTransform;
+        previewScaler.style.marginBottom = originalMarginBottom;
+      }
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
@@ -46,22 +73,22 @@ export default function ExportBar({ letterType, letterNumber }: ExportBarProps) 
         format: 'a4',
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const pdfW = pdf.internal.pageSize.getWidth();   // 210mm
+      const pdfH = pdf.internal.pageSize.getHeight();  // 297mm
       const canvasRatio = canvas.height / canvas.width;
-      const imgHeight = pdfWidth * canvasRatio;
+      const imgH = pdfW * canvasRatio;
 
-      let heightLeft = imgHeight;
+      let heightLeft = imgH;
       let position = 0;
 
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-      heightLeft -= pdfHeight;
+      pdf.addImage(imgData, 'PNG', 0, position, pdfW, imgH);
+      heightLeft -= pdfH;
 
       while (heightLeft > 1) {
-        position = heightLeft - imgHeight;
+        position = heightLeft - imgH;
         pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
+        pdf.addImage(imgData, 'PNG', 0, position, pdfW, imgH);
+        heightLeft -= pdfH;
       }
 
       const fileName = letterNumber
@@ -74,41 +101,35 @@ export default function ExportBar({ letterType, letterNumber }: ExportBarProps) 
       setTimeout(() => setPdfDone(false), 3000);
     } catch (err) {
       console.error('PDF export error:', err);
+      alert('Gagal mengekspor PDF. Coba lagi atau gunakan Print (Ctrl+P).');
     } finally {
       setPdfLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center gap-3">
-
-      {/* Download PDF Button */}
-      <button
-        onClick={handleDownloadPDF}
-        disabled={pdfLoading}
-        className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg group ${
-          pdfDone
-            ? 'bg-green-500 text-white shadow-green-500/20'
-            : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-500 hover:to-blue-400 shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0'
-        }`}
-      >
-        {pdfLoading ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Memproses...</span>
-          </>
-        ) : pdfDone ? (
-          <>
-            <CheckCircle className="w-4 h-4" />
-            <span>Berhasil!</span>
-          </>
-        ) : (
-          <>
-            <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-            <span>Download PDF</span>
-          </>
-        )}
-      </button>
-    </div>
+    <button
+      onClick={handleDownloadPDF}
+      disabled={pdfLoading}
+      className={`download-btn ${pdfDone ? 'success' : ''}`}
+      title="Download PDF"
+    >
+      {pdfLoading ? (
+        <>
+          <Loader2 style={{ width: '14px', height: '14px', animation: 'spin 0.7s linear infinite' }} />
+          <span>Memproses...</span>
+        </>
+      ) : pdfDone ? (
+        <>
+          <CheckCircle style={{ width: '14px', height: '14px' }} />
+          <span>Berhasil!</span>
+        </>
+      ) : (
+        <>
+          <Download style={{ width: '14px', height: '14px' }} />
+          <span>Download PDF</span>
+        </>
+      )}
+    </button>
   );
 }
