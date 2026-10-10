@@ -17,7 +17,7 @@ interface AIAssistantProps {
 }
 
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent';
 
 const promptTemplates: Record<LetterType, (ctx: AIAssistantProps['context'], customPrompt: string) => string> = {
   memo: (ctx, custom) => `Kamu adalah asisten profesional untuk membuat memo internal perusahaan dalam Bahasa Indonesia yang formal dan profesional.
