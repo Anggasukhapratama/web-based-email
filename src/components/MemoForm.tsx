@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { MemoFormData } from '@/types/letter';
-import AIAssistant from './AIAssistant';
 
 interface MemoFormProps {
   data: MemoFormData;
@@ -97,14 +96,6 @@ export default function MemoForm({ data, onChange }: MemoFormProps) {
           placeholder="Tulis isi memo di sini. Gunakan Enter untuk memisahkan paragraf..."
         />
       </div>
-
-      {/* AI Assistant */}
-      <AIAssistant
-        letterType="memo"
-        context={{ subject: data.subject, to: data.to, from: data.from }}
-        onApply={(text) => onChange({ ...data, body: text })}
-        fieldLabel="Isi Memo"
-      />
 
       {/* Penandatangan */}
       <div className="form-section-title" style={{ marginTop: '1rem' }}>Penandatangan</div>

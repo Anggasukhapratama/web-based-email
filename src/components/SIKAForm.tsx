@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { SIKAFormData } from '@/types/letter';
-import AIAssistant from './AIAssistant';
 
 interface SIKAFormProps {
   data: SIKAFormData;
@@ -114,14 +113,6 @@ export default function SIKAForm({ data, onChange }: SIKAFormProps) {
         <label className="form-label">Deskripsi Pekerjaan</label>
         <textarea className="form-input" rows={3} style={{ resize: 'none', lineHeight: '1.55' }} value={data.workDescription} onChange={set('workDescription')} placeholder="Uraian singkat pekerjaan yang akan dilakukan" />
       </div>
-
-      {/* AI Assistant for work description */}
-      <AIAssistant
-        letterType="sika"
-        context={{ workDescription: data.workDescription }}
-        onApply={(text) => onChange({ ...data, workDescription: text })}
-        fieldLabel="Deskripsi Pekerjaan"
-      />
 
       <div className="form-field" style={{ marginTop: '0.75rem' }}>
         <label className="form-label">Peralatan yang Digunakan</label>

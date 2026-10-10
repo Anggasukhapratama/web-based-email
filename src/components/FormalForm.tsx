@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { FormalFormData } from '@/types/letter';
-import AIAssistant from './AIAssistant';
 
 interface FormalFormProps {
   data: FormalFormData;
@@ -108,14 +107,6 @@ export default function FormalForm({ data, onChange }: FormalFormProps) {
           placeholder="Bersama ini kami..."
         />
       </div>
-
-      {/* AI Assistant */}
-      <AIAssistant
-        letterType="formal"
-        context={{ subject: data.subject, to: data.to }}
-        onApply={(text) => onChange({ ...data, body: text })}
-        fieldLabel="Isi Surat"
-      />
 
       <div className="form-field" style={{ marginTop: '0.75rem' }}>
         <label className="form-label">Salam Penutup</label>
