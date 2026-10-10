@@ -80,30 +80,69 @@ export default function AIAssistant({ letterType, context, onApply, fieldLabel =
     setSuggestion('');
 
     try {
-      const prompt = promptTemplates[letterType](context, customPrompt);
-      const res = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 512,
-          },
-        }),
-      });
+      // Try models in order: 3.8-flash → 2.0-flash → 1.5-flash
+      const MODELS = [
+        'gemini-3.8-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+      ];
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data?.error?.message || `HTTP ${res.status}`);
+      let lastError = '';
+      for (const model of MODELS) {
+        try {
+          const prompt = promptTemplates[letterType](context, customPrompt);
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 512,
+              },
+            }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            const msg: string = data?.error?.message || `HTTP ${res.status}`;
+            // Skip to next model if this one is unavailable
+            if (
+              msg.toLowerCase().includes('no longer available') ||
+              msg.toLowerCase().includes('not found') ||
+              msg.toLowerCase().includes('not supported')
+            ) {
+              lastError = msg;
+              continue;
+            }
+            // "Denied access" = API Key issue, not model issue → stop immediately
+            if (msg.toLowerCase().includes('denied') || msg.toLowerCase().includes('permission')) {
+              setError(
+                '❌ API Key tidak punya akses.\n\n' +
+                'Cara fix: Buka aistudio.google.com/app/apikey → Buat API Key BARU → pilih/buat project Google → paste di kolom atas.'
+              );
+              return;
+            }
+            lastError = msg;
+            continue;
+          }
+
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (text.trim()) {
+            setSuggestion(text.trim());
+            return;
+          }
+        } catch {
+          // Network / parse error — try next model
+          lastError = 'Gagal terhubung ke Gemini API';
+          continue;
+        }
       }
 
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      setSuggestion(text.trim());
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
-      setError(`Gagal: ${message}`);
+      // All models failed
+      setError(lastError || 'Semua model tidak tersedia. Buat API Key baru di aistudio.google.com');
     } finally {
       setLoading(false);
     }
