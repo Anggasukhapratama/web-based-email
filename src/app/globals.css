@@ -835,7 +835,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 
   .preview-canvas {
-    padding: 1rem;
+    padding: 0.5rem;
   }
 
   .status-bar {
@@ -857,7 +857,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 767px) {
   .download-btn span {
     display: none;
   }

@@ -110,12 +110,14 @@ export default function HomePage() {
   useEffect(() => {
     const updateScale = () => {
       if (!previewContainerRef.current) return;
-      const containerWidth = previewContainerRef.current.offsetWidth - 48;
+      const isMobile = window.innerWidth < 768;
+      const padding = isMobile ? 24 : 48;
+      const containerWidth = previewContainerRef.current.offsetWidth - padding;
       const a4WidthPx = 794;
       const scale = Math.min(1, containerWidth / a4WidthPx);
       setPreviewScale(scale);
     };
-    updateScale();
+    updateScale()
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
   }, []);
@@ -275,7 +277,9 @@ export default function HomePage() {
                 transform: `scale(${previewScale})`,
                 transformOrigin: 'top center',
                 width: '794px',
-                marginBottom: previewScale < 1 ? `${-(794 * (1 - previewScale) * 1.41)}px` : 0,
+                marginBottom: previewScale < 1
+                  ? `${-(794 * (1 - previewScale) * 1.414 - 16)}px`
+                  : 0,
               }}
             >
               <div id="print-target" className="paper-shadow" style={{ borderRadius: '2px', overflow: 'hidden' }}>
